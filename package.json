@@ -1,0 +1,32 @@
+{
+  "name": "json_feed",
+  "version": "1.0.0",
+  "description": "example get json from url",
+  "main": "gulpfile.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rezafitriaman/jsonFeed.git"
+  },
+  "author": "reza",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/rezafitriaman/jsonFeed/issues"
+  },
+  "homepage": "https://github.com/rezafitriaman/jsonFeed#readme",
+  "devDependencies": {
+    "browser-sync": "^2.23.6",
+    "gulp": "^3.9.1",
+    "gulp-autoprefixer": "^4.1.0",
+    "gulp-concat": "^2.6.1",
+    "gulp-concat-css": "^3.0.0",
+    "gulp-install": "^1.1.0",
+    "gulp-plumber": "^1.2.0",
+    "gulp-rename": "^1.2.2",
+    "gulp-sass": "^3.1.0",
+    "gulp-sourcemaps": "^2.6.4",
+    "gulp-uglify": "^3.0.0"
+  }
+}
