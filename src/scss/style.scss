@@ -1,3 +1,7 @@
 @import 'var';
 @import 'button';
 @import 'hamburger';
+
+body {
+  background-color: $background;
+}

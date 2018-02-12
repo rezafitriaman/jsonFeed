@@ -11,6 +11,8 @@ var gulp = require('gulp'),
 	rename = require('gulp-rename'),
 	sourcemaps = require('gulp-sourcemaps');
 
+	/*gulp gulp-uglify browser-sync gulp-sass gulp-plumber gulp-autoprefixer gulp-concat gulp-concat-css gulp-rename gulp-sourcemaps*/
+
 
 /*task*/
 gulp.task('concat', function() {
