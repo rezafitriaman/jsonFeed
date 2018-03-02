@@ -12,20 +12,21 @@ function getJson(Url, pageLoad) {
     items = myJson.items;
     console.log('finished')
 
-    var sort = items.sort(function(a,b) {
+    let sort = items.sort(function(a,b) {
     	console.log('sort')
 		/*console.log(a.pubDate)
 		console.log(b.pubDate)*/
-		 var dateA=new Date(a.pubDate), dateB=new Date(b.pubDate)
-		 var newAr = dateB-dateA;
-		/* console.log(newAr)*/
-	    return dateB-dateA //sort by date ascending
+		let dateA=new Date(a.pubDate), 
+		 	dateB=new Date(b.pubDate)
+		let newAr = dateB-dateA;
+		 console.log(newAr)
+	    return dateA-dateB
 	});
 	console.log(sort)
     return sort;
 
   })
-  .then(function(items) {
+  .then(function(sort) {
   	console.log('finsihed sort function');
     let page = pageLoad;
     let howManyitems = 10;
@@ -33,9 +34,9 @@ function getJson(Url, pageLoad) {
     console.log(`start page ${page}`);
 
     for (var i = (0 + page) * 10 ; i < (page * howManyitems ) + 10; i++) {
-        appendString(items[i]);
-        /*console.log(items[i])*/
-        arrrayNew.push(items[i])
+        appendString(sort[i]);
+        console.log(sort[i])
+        arrrayNew.push(sort[i])
     }
   })
   .catch(function(error) {
@@ -43,7 +44,7 @@ function getJson(Url, pageLoad) {
   });   
 }
 
-getJson('http://assessment.ictwerk.net/data', 3);
+getJson('http://assessment.ictwerk.net/data', 0);
 
 function appendString (data) {
 	let link = data.link,
