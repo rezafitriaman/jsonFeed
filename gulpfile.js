@@ -18,7 +18,6 @@ var gulp = require('gulp'),
 gulp.task('concat', function() {
 	console.log('concat work!');
   	return gulp.src('src/js/*.js')
-  	.pipe(uglify())
     .pipe(concat('all.js'))
     .pipe(gulp.dest('public/js'))
     .pipe(reload({stream:true}));
