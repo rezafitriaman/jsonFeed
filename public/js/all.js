@@ -1,5 +1,6 @@
 console.log('custom JS');
-
+let items;
+let arrrayNew = []
 /*--- LOAD IN REALTIME ---*/
 function getJson(Url, pageLoad) {
   fetch(Url)
@@ -8,11 +9,24 @@ function getJson(Url, pageLoad) {
       return response.json();
     })
   .then(function(myJson) {
-    let items = myJson.items;
+    items = myJson.items;
     console.log('finished')
-    return items;
+
+    var sort = items.sort(function(a,b) {
+    	console.log('sort')
+		/*console.log(a.pubDate)
+		console.log(b.pubDate)*/
+		 var dateA=new Date(a.pubDate), dateB=new Date(b.pubDate)
+		 var newAr = dateB-dateA;
+		/* console.log(newAr)*/
+	    return dateB-dateA //sort by date ascending
+	});
+	console.log(sort)
+    return sort;
+
   })
   .then(function(items) {
+  	console.log('finsihed sort function');
     let page = pageLoad;
     let howManyitems = 10;
 
@@ -20,7 +34,8 @@ function getJson(Url, pageLoad) {
 
     for (var i = (0 + page) * 10 ; i < (page * howManyitems ) + 10; i++) {
         appendString(items[i]);
-        console.log(items[i])
+        /*console.log(items[i])*/
+        arrrayNew.push(items[i])
     }
   })
   .catch(function(error) {
@@ -28,13 +43,14 @@ function getJson(Url, pageLoad) {
   });   
 }
 
-getJson('http://assessment.ictwerk.net/data', 0);
+getJson('http://assessment.ictwerk.net/data', 3);
 
 function appendString (data) {
 	let link = data.link,
 		logo = data.logo,
 		province = data.province,
 		title = data.title,
+		pubDate = data.pubDate,
 		string = `
 		<div class="item">
 			<div class="wrapper-img">
@@ -45,7 +61,7 @@ function appendString (data) {
 			        <h2 class="title">${title}</h2>
 			    </a>
 			    <p class="subtitle">Locatienet</p>
-			    <p class="place">${province}</p>
+			    ${province.length > 0 ? provinceString(province) : ""}
 			</div>
 			<div class="wrapper-button">
 			    <a href="#">
@@ -54,11 +70,45 @@ function appendString (data) {
 			</div>
 		</div>
 	`;
-/*
-	console.log(link)
-	console.log(logo)
-	console.log(province)
-	console.log(title)*/
+	console.log(pubDate)
+
+/*	console.log(link)
+	console.log(logo)*/
+	/*console.log(province)*/
+/*	console.log(title)*/
 
   document.querySelector('#content').insertAdjacentHTML('afterbegin', string);
 }
+
+function provinceString(province) {
+	/*console.log(province)*/
+
+	let string = `
+		<p class="place">${province}</p>
+	`;
+
+	return string;
+}
+
+/*var sander = Date.parse('Fri, 02 Mar 2018 08:03:45 GMT');
+var reza = Date.parse('Fri, 02 Mar 2018 11:03:00 GMT');
+
+console.log(sander);
+// expected output: 0
+
+console.log(reza);
+// expected output: 818035920000
+console.log(reza - sander)
+console.log(sander - reza)
+console.log(sander < reza)*/
+
+/*var test = arrrayNew.sort(function(a,b) {
+	console.log(a.pubDate)
+	console.log(b.pubDate)
+	 var dateA=new Date(a.pubDate), dateB=new Date(b.pubDate)
+	 var newAr = dateB-dateA;
+	 console.log(newAr)
+    return dateB-dateA //sort by date ascending
+});
+
+console.log(test)*/
