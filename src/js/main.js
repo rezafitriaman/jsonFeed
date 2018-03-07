@@ -19,19 +19,20 @@ function getJson(Url, pageLoad) {
   })
   .then(function(sort) {
   	console.log('finsihed sort function');
+  	/*console.log('sort', sort);*/
     let page = pageLoad,
-    	howManyitems = 10;
-
+    	howManyitems = 10,
+    	itemsLength = items.length,
+    	lastPage = ((page * howManyitems ) + 10 - itemsLength > 0) ? (page * howManyitems ) + 10 - itemsLength : 0;
+    	/*console.log('lastPage', lastPage)*/
+    	console.log('startPage', page);
     /*make spinner disapere*/
     document.querySelector('#loading').style.display = 'none';
 
-    console.log(`start page ${page}`);
-
-    for (var i = (0 + page) * 10 ; i < (page * howManyitems ) + 10; i++) {
+    for (var i = (0 + page) * 10 ; i < (page * howManyitems ) + 10 - lastPage ; i++) {
         appendString(sort[i]);
     }
 
-    clickpage();
   })
   .catch(function(error) {
         console.log(error);
@@ -39,25 +40,22 @@ function getJson(Url, pageLoad) {
 }
 
 getJson('http://assessment.ictwerk.net/data', 0);
+clickpage();
 
 function clickpage() {
 	console.log('on click function')
 	let itemPageNumber = document.querySelector('#page').querySelectorAll('.number'),
-		load = true;
+		prevButton = document.querySelector('#prev'),
+		nextButton = document.querySelector('#next')
 
-	console.log(load)
 	/*loop trought the pageNumber*/
 	for (var i = 0; i < itemPageNumber.length; i++) {
-		console.log('on loop')
+		/*on click this change the page to this number*/  
 		itemPageNumber[i].addEventListener("click", function(){
-			console.log('click page')
 			let $this = this,
 		    	page = $this.innerText,
 		    	items = document.querySelector('#content').querySelectorAll('.item'),
 		    	parentPageNumber = $this.parentElement.parentElement.querySelectorAll('.item');
-
-		    console.log(parentPageNumber)
-		    console.log(page)
 
 		    for (var i = 0; i < items.length; i++) {
 				items[i].remove()
@@ -72,35 +70,56 @@ function clickpage() {
 			document.querySelector('#loading').style.display = 'block';
 			/*hide page number*/
 			document.querySelector('#page').style.display = 'none';
-			console.log(load)
+
 			/*load Json*/
-			if (load == true) {
-				console.log('loadpage')
-				getJson('http://assessment.ictwerk.net/data', page);
-				load = false;
-			}
+			getJson('http://assessment.ictwerk.net/data', page);
+
 		});
 	}
 
+	/*on click next list number*/
+	nextButton.addEventListener('click', nextOrPrev);
+
+	/*on click prev list number*/
+	prevButton.addEventListener('click', nextOrPrev);
+}
+
+function nextOrPrev () {
+	let target = this.id,
+		listNumber = document.querySelector('#page').querySelectorAll('.prevOrNext');
+		console.log(target)
+	if (target == 'next') {
+
+		document.querySelector('#prev').style.opacity = 1;
+
+		for (var i = 0; i < listNumber.length; i++) {
+			let value = parseInt(listNumber[i].innerText),
+				parent = listNumber[i].parentElement
+
+			listNumber[i].innerText = value + listNumber.length;
+			parent.classList.remove("active");
+		}	
+
+	}else {
+
+		for (var i = 0; i < listNumber.length; i++) {
+			let value = parseInt(listNumber[i].innerText),
+				parent = listNumber[i].parentElement
+
+			listNumber[i].innerText = value - listNumber.length;
+			parent.classList.remove("active");
+		}
+
+	}
 }
 
 function pageNumber (items) {
-	console.log('pagesNumber');
+	/*console.log('pagesNumber');*/
 	let itemsLength = items.length / 10,
-		maxPagesNumber = Math.ceil(itemsLength) - 1,
-		clickOnce = true;
+		maxPagesNumber = Math.ceil(itemsLength) - 1;
 
 	document.querySelector('#lastPage').innerHTML = maxPagesNumber;
 	document.querySelector('#page').style.display = 'flex';
-	console.log(maxPagesNumber);
-
-	/*fix this double click*/
-	if (clickOnce == true) {
-		document.querySelector('#next').addEventListener('click', function() {
-			console.log('click')
-		});
-		clickOnce = false;
-	}
 }
 
 function newToOld (a, b) {
@@ -112,8 +131,8 @@ function newToOld (a, b) {
 }
 
 function appendString (data) {
-	let link = data.link,
-		logo = data.logo,
+	let logo = data.logo,
+		link = data.link,
 		province = data.province,
 		title = data.title,
 		pubDate = data.pubDate,

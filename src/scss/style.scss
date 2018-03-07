@@ -168,8 +168,27 @@ body {
 			.items {
 				padding-left: 0px;
     			list-style-type: none;
-    			.item, .doted {
+    			.item {
     				cursor: pointer;
+    				z-index: 999;
+    				display: inline-block;
+    				width: 25px;
+				    height: 25px;
+				    color: #6d6d6d;
+				    justify-content: center;
+				    flex-direction: row;
+				    transition: all .3s ease-in-out;
+				    span {
+				    	display: flex;
+					    justify-content: center;
+					    align-items: center;
+					    height: 100%;
+				    }
+				    #prev {
+				    	opacity: 0;
+				    }
+    			}
+    			.doted {
     				z-index: 999;
     				display: inline-block;
     				width: 25px;
