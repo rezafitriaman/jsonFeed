@@ -1,6 +1,5 @@
 console.log('custom JS');
 let items;
-let arrrayNew = []
 /*--- LOAD IN REALTIME ---*/
 function getJson(Url, pageLoad) {
   fetch(Url)
@@ -12,32 +11,27 @@ function getJson(Url, pageLoad) {
     items = myJson.items;
     console.log('finished')
 
-    let sort = items.sort(function(a,b) {
-    	console.log('sort')
-		/*console.log(a.pubDate)
-		console.log(b.pubDate)*/
-		let dateA=new Date(a.pubDate), 
-		 	dateB=new Date(b.pubDate)
-		let newAr = dateB-dateA;
-		 console.log(newAr)
-	    return dateA-dateB
-	});
-	console.log(sort)
+    pageNumber(items);
+    
+    let sort = items.sort(newToOld)
     return sort;
 
   })
   .then(function(sort) {
   	console.log('finsihed sort function');
-    let page = pageLoad;
-    let howManyitems = 10;
+    let page = pageLoad,
+    	howManyitems = 10;
+
+    /*make spinner disapere*/
+    document.querySelector('#loading').style.display = 'none';
 
     console.log(`start page ${page}`);
 
     for (var i = (0 + page) * 10 ; i < (page * howManyitems ) + 10; i++) {
         appendString(sort[i]);
-        console.log(sort[i])
-        arrrayNew.push(sort[i])
     }
+
+    clickpage();
   })
   .catch(function(error) {
         console.log(error);
@@ -45,6 +39,77 @@ function getJson(Url, pageLoad) {
 }
 
 getJson('http://assessment.ictwerk.net/data', 0);
+
+function clickpage() {
+	console.log('on click function')
+	let itemPageNumber = document.querySelector('#page').querySelectorAll('.number'),
+		load = true;
+
+	console.log(load)
+	/*loop trought the pageNumber*/
+	for (var i = 0; i < itemPageNumber.length; i++) {
+		console.log('on loop')
+		itemPageNumber[i].addEventListener("click", function(){
+			console.log('click page')
+			let $this = this,
+		    	page = $this.innerText,
+		    	items = document.querySelector('#content').querySelectorAll('.item'),
+		    	parentPageNumber = $this.parentElement.parentElement.querySelectorAll('.item');
+
+		    console.log(parentPageNumber)
+		    console.log(page)
+
+		    for (var i = 0; i < items.length; i++) {
+				items[i].remove()
+			}
+
+			for (var i = 0; i < parentPageNumber.length; i++) {
+				parentPageNumber[i].classList.remove("active");
+			}
+			/*add class active on page number*/
+			$this.parentElement.classList.add("active");
+			/*show spinner*/
+			document.querySelector('#loading').style.display = 'block';
+			/*hide page number*/
+			document.querySelector('#page').style.display = 'none';
+			console.log(load)
+			/*load Json*/
+			if (load == true) {
+				console.log('loadpage')
+				getJson('http://assessment.ictwerk.net/data', page);
+				load = false;
+			}
+		});
+	}
+
+}
+
+function pageNumber (items) {
+	console.log('pagesNumber');
+	let itemsLength = items.length / 10,
+		maxPagesNumber = Math.ceil(itemsLength) - 1,
+		clickOnce = true;
+
+	document.querySelector('#lastPage').innerHTML = maxPagesNumber;
+	document.querySelector('#page').style.display = 'flex';
+	console.log(maxPagesNumber);
+
+	/*fix this double click*/
+	if (clickOnce == true) {
+		document.querySelector('#next').addEventListener('click', function() {
+			console.log('click')
+		});
+		clickOnce = false;
+	}
+}
+
+function newToOld (a, b) {
+	let dateA = new Date(a.pubDate), 
+	 	dateB = new Date(b.pubDate),
+		newAr = dateB-dateA;
+
+    return dateB-dateA
+}
 
 function appendString (data) {
 	let link = data.link,
@@ -71,45 +136,14 @@ function appendString (data) {
 			</div>
 		</div>
 	`;
-	console.log(pubDate)
-
-/*	console.log(link)
-	console.log(logo)*/
-	/*console.log(province)*/
-/*	console.log(title)*/
 
   document.querySelector('#content').insertAdjacentHTML('afterbegin', string);
 }
 
 function provinceString(province) {
-	/*console.log(province)*/
-
 	let string = `
 		<p class="place">${province}</p>
 	`;
 
 	return string;
 }
-
-/*var sander = Date.parse('Fri, 02 Mar 2018 08:03:45 GMT');
-var reza = Date.parse('Fri, 02 Mar 2018 11:03:00 GMT');
-
-console.log(sander);
-// expected output: 0
-
-console.log(reza);
-// expected output: 818035920000
-console.log(reza - sander)
-console.log(sander - reza)
-console.log(sander < reza)*/
-
-/*var test = arrrayNew.sort(function(a,b) {
-	console.log(a.pubDate)
-	console.log(b.pubDate)
-	 var dateA=new Date(a.pubDate), dateB=new Date(b.pubDate)
-	 var newAr = dateB-dateA;
-	 console.log(newAr)
-    return dateB-dateA //sort by date ascending
-});
-
-console.log(test)*/
