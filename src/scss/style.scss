@@ -184,10 +184,11 @@ body {
 					    align-items: center;
 					    height: 100%;
 				    }
-				    #prev {
-				    	opacity: 0;
-				    }
     			}
+    			#prev {
+			    	opacity: 0;
+			    	cursor: auto;
+			    }
     			.doted {
     				z-index: 999;
     				display: inline-block;

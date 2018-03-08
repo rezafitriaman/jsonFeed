@@ -1,6 +1,8 @@
 console.log('custom JS');
-let items;
+
 /*--- LOAD IN REALTIME ---*/
+let items;
+let once = true;
 function getJson(Url, pageLoad) {
   fetch(Url)
     .then(function(response) {
@@ -8,12 +10,10 @@ function getJson(Url, pageLoad) {
       return response.json();
     })
   .then(function(myJson) {
-    items = myJson.items;
-    console.log('finished')
+	items = myJson.items;
+	console.log('sort')
+    let sort = items.sort(newToOld);
 
-    pageNumber(items);
-    
-    let sort = items.sort(newToOld)
     return sort;
 
   })
@@ -22,16 +22,21 @@ function getJson(Url, pageLoad) {
   	/*console.log('sort', sort);*/
     let page = pageLoad,
     	howManyitems = 10,
-    	itemsLength = items.length,
+    	itemsLength = sort.length,
     	lastPage = ((page * howManyitems ) + 10 - itemsLength > 0) ? (page * howManyitems ) + 10 - itemsLength : 0;
-    	/*console.log('lastPage', lastPage)*/
+
     	console.log('startPage', page);
-    /*make spinner disapere*/
+
     document.querySelector('#loading').style.display = 'none';
 
     for (var i = (0 + page) * 10 ; i < (page * howManyitems ) + 10 - lastPage ; i++) {
         appendString(sort[i]);
+        /*console.log(i)*/
+/*        numbers(i);*/
     }
+
+
+    pageNumber(sort);
 
   })
   .catch(function(error) {
@@ -40,13 +45,13 @@ function getJson(Url, pageLoad) {
 }
 
 getJson('http://assessment.ictwerk.net/data', 0);
-clickpage();
 
 function clickpage() {
 	console.log('on click function')
 	let itemPageNumber = document.querySelector('#page').querySelectorAll('.number'),
 		prevButton = document.querySelector('#prev'),
-		nextButton = document.querySelector('#next')
+		nextButton = document.querySelector('#next'),
+		lastPage = document.querySelector('#lastPage');
 
 	/*loop trought the pageNumber*/
 	for (var i = 0; i < itemPageNumber.length; i++) {
@@ -70,9 +75,19 @@ function clickpage() {
 			document.querySelector('#loading').style.display = 'block';
 			/*hide page number*/
 			document.querySelector('#page').style.display = 'none';
-
 			/*load Json*/
 			getJson('http://assessment.ictwerk.net/data', page);
+
+			if(page == lastPage.innerText) {
+				let number = document.querySelectorAll('.prevOrNext');
+				let pageNumber = lastPage.innerText - 1;
+				console.log('clickpage', page)
+
+				for (var i = number.length - 1; i >= 0; i--) {
+					number[i].innerText = pageNumber--;
+				}
+				nextOrPrev(lastPage.id);
+			}
 
 		});
 	}
@@ -80,27 +95,59 @@ function clickpage() {
 	/*on click next list number*/
 	nextButton.addEventListener('click', nextOrPrev);
 
-	/*on click prev list number*/
-	prevButton.addEventListener('click', nextOrPrev);
 }
 
-function nextOrPrev () {
-	let target = this.id,
-		listNumber = document.querySelector('#page').querySelectorAll('.prevOrNext');
+function nextOrPrev (lastPage) {
+	let target = this.id || lastPage,
+		listNumber = document.querySelector('#page').querySelectorAll('.prevOrNext'),
+		prevButtonEl = document.querySelector('#prev'),
+		maxNumber = parseInt(document.querySelector('#lastPage').innerText) - 1,
+		nextButtonEl = document.querySelector('#next');
 		console.log(target)
-	if (target == 'next') {
 
-		document.querySelector('#prev').style.opacity = 1;
+	if (target == 'next' || target == 'lastPage') {
+		if(target == 'lastPage') {
+			console.log('lastPage')
+			nextButtonEl.style.opacity = 0;
+			nextButtonEl.style.cursor = 'auto';
+			nextButtonEl.removeEventListener('click', nextOrPrev)
 
-		for (var i = 0; i < listNumber.length; i++) {
-			let value = parseInt(listNumber[i].innerText),
-				parent = listNumber[i].parentElement
+			prevButtonEl.style.opacity = 1;
+			prevButtonEl.style.cursor = 'pointer';
+			prevButtonEl.addEventListener('click', nextOrPrev);
+		}else {
+			console.log('next')
 
-			listNumber[i].innerText = value + listNumber.length;
-			parent.classList.remove("active");
+			prevButtonEl.style.opacity = 1;
+			prevButtonEl.style.cursor = 'pointer';
+			prevButtonEl.addEventListener('click', nextOrPrev);
+
+			for (var i = 0; i < listNumber.length; i++) {
+				let value = parseInt(listNumber[i].innerText),
+					parent = listNumber[i].parentElement
+				listNumber[i].innerText = value + listNumber.length;
+				parent.classList.remove("active");
+
+				console.log(listNumber[i].innerText)
+				if(listNumber[i].innerText > maxNumber) {
+					console.log('loop')
+					console.log(listNumber[i])
+					listNumber[i].parentElement.style.display = 'none';
+					nextButtonEl.style.opacity = 0;
+					nextButtonEl.style.cursor = 'auto';
+					nextButtonEl.removeEventListener('click', nextOrPrev)
+				}
+			}
+
+			if(listNumber[9].innerText == maxNumber) {
+				nextButtonEl.style.opacity = 0;
+				nextButtonEl.style.cursor = 'auto';
+				nextButtonEl.removeEventListener('click', nextOrPrev);
+			}
 		}	
 
 	}else {
+		console.log('prev')
 
 		for (var i = 0; i < listNumber.length; i++) {
 			let value = parseInt(listNumber[i].innerText),
@@ -108,8 +155,17 @@ function nextOrPrev () {
 
 			listNumber[i].innerText = value - listNumber.length;
 			parent.classList.remove("active");
+			listNumber[i].parentElement.style.display = 'inline-block';
+		}
+		if(listNumber[0].innerText == '0') {
+			prevButtonEl.style.opacity = 0;
+			prevButtonEl.style.cursor = 'auto';
+			prevButtonEl.removeEventListener('click', nextOrPrev);
 		}
 
+		nextButtonEl.style.opacity = 1;
+		nextButtonEl.style.cursor = 'pointer';
+		nextButtonEl.addEventListener('click', nextOrPrev)
 	}
 }
 
@@ -120,6 +176,16 @@ function pageNumber (items) {
 
 	document.querySelector('#lastPage').innerHTML = maxPagesNumber;
 	document.querySelector('#page').style.display = 'flex';
+
+	if(once) {
+		console.log('Doing this once!');
+		clickpage();
+		once = false;
+
+	}else{
+		return;
+	}
+
 }
 
 function newToOld (a, b) {
@@ -166,3 +232,21 @@ function provinceString(province) {
 
 	return string;
 }
+
+/*function numbers(numbers) {
+	console.log(numbers)
+	let stringFirst = `
+		<li class="item">
+            <span class="number prevOrNext">${numbers}</span>
+        </li>
+	`;
+	
+	document.querySelector('.doted').insertAdjacentHTML('beforebegin', stringFirst);
+
+	if(numbers == 0) {
+		document.querySelector('#page').querySelectorAll('.item')[1].classList.add("active");
+	}
+	if(numbers == 9) {
+		clickpage();
+	}
+}*/
