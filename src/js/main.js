@@ -1,42 +1,43 @@
 console.log('custom JS');
 
 /*--- LOAD IN REALTIME ---*/
+
+/*GLOBAL VARIABLE*/
 let items;
 let once = true;
+/*START GET JSON*/
 function getJson(Url, pageLoad) {
   fetch(Url)
     .then(function(response) {
       console.log('get response')
       return response.json();
+
     })
   .then(function(myJson) {
 	items = myJson.items;
-	console.log('sort')
+	/*USE SORT METHODE AND SAVE IT ON AN VARIABLE*/
     let sort = items.sort(newToOld);
-
+    console.log('sort')
     return sort;
 
   })
-  .then(function(sort) {
-  	console.log('finsihed sort function');
-  	/*console.log('sort', sort);*/
+  .then(function(sortedItem) {
     let page = pageLoad,
     	howManyitems = 10,
-    	itemsLength = sort.length,
+    	itemsLength = sortedItem.length,
+    	spinnerEl = document.querySelector('#loading'),
     	lastPage = ((page * howManyitems ) + 10 - itemsLength > 0) ? (page * howManyitems ) + 10 - itemsLength : 0;
 
-    	console.log('startPage', page);
-
-    document.querySelector('#loading').style.display = 'none';
-
+    console.log('startPage', page);
+    /*HIDE SPINNER*/
+    spinnerEl.style.display = 'none';
+    /*LOOP THROUGHT THE ITEMS*/
     for (var i = (0 + page) * 10 ; i < (page * howManyitems ) + 10 - lastPage ; i++) {
-        appendString(sort[i]);
-        /*console.log(i)*/
-/*        numbers(i);*/
+        /*APPEND HTML STRINGS*/
+        appendString(sortedItem[i]);
     }
-
-
-    pageNumber(sort);
+    /*ADD PAGE NUMBER*/
+    pageNumber(sortedItem, spinnerEl);
 
   })
   .catch(function(error) {
@@ -44,14 +45,36 @@ function getJson(Url, pageLoad) {
   });   
 }
 
+/*START THE FIRST PAGE*/
 getJson('http://assessment.ictwerk.net/data', 0);
 
-function clickpage() {
+/*IMPLEMENT PAGE NUMBER*/
+function pageNumber (sortedItem, spinnerEl) {
+	let itemsLength = sortedItem.length / 10,
+		maxPagesNumber = Math.ceil(itemsLength) - 1,
+		lastPageEl = document.querySelector('#lastPage'),
+		pageContainerEl = document.querySelector('#page');
+
+
+	lastPageEl.innerHTML = maxPagesNumber;
+	pageContainerEl.style.display = 'flex';
+
+	if(once) {
+		console.log('Doing this once!');
+		clickpage(lastPageEl, pageContainerEl, spinnerEl);
+		once = false;
+
+	}else{
+		return;
+	}
+
+}
+
+function clickpage(lastPageEl, pageContainerEl, spinnerEl) {
 	console.log('on click function')
-	let itemPageNumber = document.querySelector('#page').querySelectorAll('.number'),
+	let itemPageNumber = pageContainerEl.querySelectorAll('.number'),
 		prevButton = document.querySelector('#prev'),
-		nextButton = document.querySelector('#next'),
-		lastPage = document.querySelector('#lastPage');
+		nextButton = document.querySelector('#next');
 
 	/*loop trought the pageNumber*/
 	for (var i = 0; i < itemPageNumber.length; i++) {
@@ -59,11 +82,11 @@ function clickpage() {
 		itemPageNumber[i].addEventListener("click", function(){
 			let $this = this,
 		    	page = $this.innerText,
-		    	items = document.querySelector('#content').querySelectorAll('.item'),
+		    	itemsEl = document.querySelector('#content').querySelectorAll('.item'),
 		    	parentPageNumber = $this.parentElement.parentElement.querySelectorAll('.item');
 
-		    for (var i = 0; i < items.length; i++) {
-				items[i].remove()
+		    for (var i = 0; i < itemsEl.length; i++) {
+				itemsEl[i].remove()
 			}
 
 			for (var i = 0; i < parentPageNumber.length; i++) {
@@ -72,21 +95,22 @@ function clickpage() {
 			/*add class active on page number*/
 			$this.parentElement.classList.add("active");
 			/*show spinner*/
-			document.querySelector('#loading').style.display = 'block';
+			spinnerEl.style.display = 'block';
 			/*hide page number*/
-			document.querySelector('#page').style.display = 'none';
+			pageContainerEl.style.display = 'none';
 			/*load Json*/
 			getJson('http://assessment.ictwerk.net/data', page);
+			/*IF LAST PAGE NUMBER IS CLIKED CREATE DEC NUMBERS FROM THE MAX NUMBER*/
+			if(page == lastPageEl.innerText) {
+				let numbersEl = document.querySelectorAll('.prevOrNext'),
+					pageNumber = lastPageEl.innerText - 1;
 
-			if(page == lastPage.innerText) {
-				let number = document.querySelectorAll('.prevOrNext');
-				let pageNumber = lastPage.innerText - 1;
 				console.log('clickpage', page)
 
-				for (var i = number.length - 1; i >= 0; i--) {
-					number[i].innerText = pageNumber--;
+				for (var i = numbersEl.length - 1; i >= 0; i--) {
+					numbersEl[i].innerText = pageNumber--;
 				}
-				nextOrPrev(lastPage.id);
+				nextOrPrev(lastPageEl);
 			}
 
 		});
@@ -97,13 +121,12 @@ function clickpage() {
 
 }
 
-function nextOrPrev (lastPage) {
-	let target = this.id || lastPage,
+function nextOrPrev (lastPageEl) {
+	let target = this.id || lastPageEl.id,
 		listNumber = document.querySelector('#page').querySelectorAll('.prevOrNext'),
 		prevButtonEl = document.querySelector('#prev'),
 		maxNumber = parseInt(document.querySelector('#lastPage').innerText) - 1,
 		nextButtonEl = document.querySelector('#next');
-		console.log(target)
 
 	if (target == 'next' || target == 'lastPage') {
 		if(target == 'lastPage') {
@@ -127,6 +150,7 @@ function nextOrPrev (lastPage) {
 					parent = listNumber[i].parentElement
 				listNumber[i].innerText = value + listNumber.length;
 				parent.classList.remove("active");
+				listNumber[i].parentElement.style.display = 'inline-block';
 
 				console.log(listNumber[i].innerText)
 				if(listNumber[i].innerText > maxNumber) {
@@ -156,6 +180,13 @@ function nextOrPrev (lastPage) {
 			listNumber[i].innerText = value - listNumber.length;
 			parent.classList.remove("active");
 			listNumber[i].parentElement.style.display = 'inline-block';
+
+			if(listNumber[i].innerText < 0) {
+				listNumber[i].parentElement.style.display = 'none';
+				prevButtonEl.style.opacity = 0;
+				prevButtonEl.style.cursor = 'auto';
+				prevButtonEl.removeEventListener('click', nextOrPrev)
+			}
 		}
 		if(listNumber[0].innerText == '0') {
 			prevButtonEl.style.opacity = 0;
@@ -169,25 +200,7 @@ function nextOrPrev (lastPage) {
 	}
 }
 
-function pageNumber (items) {
-	/*console.log('pagesNumber');*/
-	let itemsLength = items.length / 10,
-		maxPagesNumber = Math.ceil(itemsLength) - 1;
-
-	document.querySelector('#lastPage').innerHTML = maxPagesNumber;
-	document.querySelector('#page').style.display = 'flex';
-
-	if(once) {
-		console.log('Doing this once!');
-		clickpage();
-		once = false;
-
-	}else{
-		return;
-	}
-
-}
-
+/*IMPLEMENT SORT FUNCTION FORM NEW TO OLD*/
 function newToOld (a, b) {
 	let dateA = new Date(a.pubDate), 
 	 	dateB = new Date(b.pubDate),
@@ -196,6 +209,7 @@ function newToOld (a, b) {
     return dateB-dateA
 }
 
+/* FUNCTION TO APPEND STRING FOR ITEMS*/
 function appendString (data) {
 	let logo = data.logo,
 		link = data.link,
@@ -224,7 +238,7 @@ function appendString (data) {
 
   document.querySelector('#content').insertAdjacentHTML('afterbegin', string);
 }
-
+/*IF PROVINCE EXIST THEN APPEND THIS FUNCTION*/
 function provinceString(province) {
 	let string = `
 		<p class="place">${province}</p>
